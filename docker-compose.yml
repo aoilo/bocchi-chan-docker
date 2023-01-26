@@ -18,7 +18,7 @@ services:
     build: .
     environment: 
       TZ: Asia/Tokyo
-    image: node:18
+    # image: node:18
     tty: true
     ports:
       - "8001:8001"
