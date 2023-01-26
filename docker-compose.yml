@@ -10,9 +10,9 @@ services:
     ports:
       - "3333:3306"
     volumes:
-      - ./mysql/data:/var/lib/mysql  # mysqlのデータを永続化
-      - ./mysql/init:/docker-entrypoint-initdb.d  # コンテナ起動時にSQLを発行
-      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf  # 設定ファイルをバインド
+      # - ./mysql/data:/var/lib/mysql  # mysqlのデータを永続化
+      # - ./mysql/init:/docker-entrypoint-initdb.d  # コンテナ起動時にSQLを発行
+      # - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf  # 設定ファイルをバインド
     restart: always
   nodejs:
     build: .
