@@ -1,3 +1,4 @@
+console.log("start");
 const Eris = require("eris");
 const time = require("../service/fDatetime")
 // const sequelize = require("./service/database")

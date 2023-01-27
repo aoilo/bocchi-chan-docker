@@ -1,6 +1,7 @@
 # Node.js: 14.4.0
 FROM node:14
 
+# RUN apk --no-cache add --virtual .builds-deps build-base python3
 # Add Tini
 # ENV TINI_VERSION v0.15.0
 # ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
