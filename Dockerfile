@@ -1,5 +1,5 @@
 # Node.js: 14.4.0
-FROM node:14
+FROM node:18
 
 # RUN apk --no-cache add --virtual .builds-deps build-base python3
 # Add Tini
