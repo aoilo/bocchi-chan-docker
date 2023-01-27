@@ -9,7 +9,7 @@ services:
       MYSQL_ROOT_PASSWORD: bocchi
       TZ: "Asia/Tokyo"
     ports:
-      - "3333:3306"
+      - "3334:3306"
     # volumes:
       # - ./mysql/data:/var/lib/mysql  # mysqlのデータを永続化
       # - ./mysql/init:/docker-entrypoint-initdb.d  # コンテナ起動時にSQLを発行
@@ -22,8 +22,8 @@ services:
     # image: node:18
     tty: true
     ports:
-      - "8001:8001"
+      - "8004:8000"
     volumes:
-      - ./app:/src/app
+      - .:/src/app
     working_dir: /src
     restart: always
