@@ -12,8 +12,8 @@ FROM node:18
 WORKDIR /src
 
 # Install app dependencies (package.json and package-lock.json)
-COPY package*.json ./
-RUN npm install
+# COPY package*.json ./
+# RUN npm install
 
 # Bundle app source (server.js)
 # COPY . .
