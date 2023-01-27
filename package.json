@@ -12,5 +12,13 @@
   },
   "author": "stub",
   "license": "ISC",
-  "description": ""
+  "description": " private discord-bot",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/5573/bocchi-chan-docker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/5573/bocchi-chan-docker/issues"
+  },
+  "homepage": "https://github.com/5573/bocchi-chan-docker#readme"
 }
