@@ -24,6 +24,7 @@ services:
     ports:
       - "8004:8000"
     volumes:
-      - .:/src/app
+      - .:/src
     working_dir: /src
     restart: always
+    command: node /src/app/io/index.js
