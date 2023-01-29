@@ -1,7 +1,9 @@
 {
   "dependencies": {
+    "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "eris": "^0.17.1",
+    "fs": "^0.0.1-security",
     "path": "^0.12.7"
   },
   "name": "bocchi-chan",
