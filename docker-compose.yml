@@ -10,10 +10,10 @@ services:
       TZ: "Asia/Tokyo"
     ports:
       - "3334:3306"
-    # volumes:
-      # - ./mysql/data:/var/lib/mysql  # mysqlのデータを永続化
-      # - ./mysql/init:/docker-entrypoint-initdb.d  # コンテナ起動時にSQLを発行
-      # - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf  # 設定ファイルをバインド
+    volumes:
+      - ./mysql/data:/var/lib/mysql  # mysqlのデータを永続化
+      - ./mysql/init:/docker-entrypoint-initdb.d  # コンテナ起動時にSQLを発行
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf  # 設定ファイルをバインド
     restart: always
   nodejs:
     build: .
@@ -27,6 +27,8 @@ services:
       - .:/src
     working_dir: /src
     restart: always
+    depends_on: # 先に起動させるサーバを指定
+     - db
     # command: >
     #   bash -c  "node /src/app/io/index.js &&
     #   node /src/app/normal/index.js"
