@@ -27,4 +27,6 @@ services:
       - .:/src
     working_dir: /src
     restart: always
-    command: node /src/app/io/index.js
+    command: >
+      bash -c  "node /src/app/io/index.js &&
+      node /src/app/normal/index.js"
