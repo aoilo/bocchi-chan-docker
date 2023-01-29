@@ -1,9 +1,12 @@
 console.log("start");
+
 const Eris = require("eris");
 const time = require("../service/fDatetime")
 // const sequelize = require("./service/database")
 // const UserStatus = require("./models/UserStatus")
-require('dotenv').config();
+const path = require('path')
+const ENV_PATH = path.join(__dirname, '../../.env');
+require('dotenv').config({path: ENV_PATH});
 var bot = new Eris(process.env.TOKEN);
 
 bot.on("error", (err) => {
