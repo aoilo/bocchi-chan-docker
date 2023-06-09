@@ -4,8 +4,12 @@ const Eris = require("eris");
 const time = require("./app/service/fDatetime")
 const sequelize = require("./app/service/database")
 const UserStatus = require("./app/models/UserStatus")
+const scrapeBoothData = require("./app/notifications/notification")
+const compareJsonFiles = require('./app/notifications/compareJson')
 const path = require('path')
 const fs = require('fs');
+const cron = require('node-cron')
+const tempPath = path.join(__dirname, "./app/temp");
 // const ENV_PATH = path.join(__dirname, '../../.env');
 // require('dotenv').config({path: ENV_PATH});
 require('dotenv').config();
@@ -84,15 +88,50 @@ bot.on("voiceChannelSwitch", async (member, newChannel, oldChannel) => {
 bot.connect();
 
 
-//command
+//command　＆　booth notify
 
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const { EmbedBuilder, Client, Collection, GatewayIntentBits } = require('discord.js');
 // const { token } = require('./config.json');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-client.on('ready', () => {
+client.on('ready', async () => {
 	console.log(`${client.user.tag}でログインしました。`);
+    const channel = await client.channels.fetch(process.env.CHANNEL2)
+    cron.schedule('*/45 * * * * *', () => {
+        scrapeBoothData().then((itemData) => {
+            sorted = itemData.sort((a, b) => a.index - b.index);
+            compareJsonFiles(tempPath, sorted)
+            .then(result => {
+                if(!result) {
+                    const newItemEmbed = new EmbedBuilder()
+                    .setColor(0x0099FF)
+                    .setTitle(sorted[0]['name'])
+                    .setURL(sorted[0]['url'])
+                    .setAuthor({ name: 'Booth新着アイテム' })
+                    // .setDescription('Some description here')
+                    // .setThumbnail(sorted[0]['image'])
+                    .setImage(sorted[0]['image'])
+                    .setTimestamp()
+                    channel.send({ embeds: [newItemEmbed] });
+                    const outPath = path.join(__dirname, "./app/temp/boothData.json");
+                    fs.writeFile(outPath, JSON.stringify(sorted, null, 2), (err) => {
+                        if (err) {
+                            console.error(err);
+                            return;
+                        }
+                        console.log("ファイル出力完了。");
+                    });
+                }
+                console.log('0:不一致 1:一致 :', result);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }).catch((error) => {
+            console.error(error);
+        });
+    })
 });
 
 client.login(process.env.TOKEN);
