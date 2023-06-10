@@ -4,6 +4,7 @@ const Eris = require("eris");
 const time = require("./app/service/fDatetime")
 const sequelize = require("./app/service/database")
 const UserStatus = require("./app/models/UserStatus")
+const BoothItem = require("./app/models/BoothItem")
 const scrapeBoothData = require("./app/notifications/notification")
 const compareJsonFiles = require('./app/notifications/compareJson')
 const path = require('path')
@@ -98,20 +99,38 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.on('ready', async () => {
 	console.log(`${client.user.tag}でログインしました。`);
     const channel = await client.channels.fetch(process.env.CHANNEL2)
-    cron.schedule('*/45 * * * * *', () => {
+    cron.schedule('*/30 * * * * *', () => {
         scrapeBoothData().then((itemData) => {
             sorted = itemData.sort((a, b) => a.index - b.index);
             compareJsonFiles(tempPath, sorted)
-            .then(result => {
+            .then(async result => {
                 if(!result) {
+                    for (let i = 0; i < 5; i++) {
+                        try {
+                            const exist = await BoothItem.findOne({ where: { data_product_id: sorted[i]['data_product_id'] } });
+                            if (exist) {
+                                continue;
+                            }
+                            let newItem = await BoothItem.create({
+                                data_product_id: sorted[i]['data_product_id'],
+                                name: sorted[i]['name'],
+                                shop_name: sorted[i]['shop_name'],
+                                data_product_category: sorted[i]['data_product_category'],
+                                url: sorted[i]['url'],
+                                img: sorted[i]['img']
+                            });
+                        } catch(ex) {
+                            console.log(ex);
+                        }
+                    }
                     const newItemEmbed = new EmbedBuilder()
                     .setColor(0x0099FF)
                     .setTitle(sorted[0]['name'])
                     .setURL(sorted[0]['url'])
                     .setAuthor({ name: 'Booth新着アイテム' })
-                    // .setDescription('Some description here')
+                    .setDescription(sorted[0]['shop_name'])
                     // .setThumbnail(sorted[0]['image'])
-                    .setImage(sorted[0]['image'])
+                    .setImage(sorted[0]['img'])
                     .setTimestamp()
                     channel.send({ embeds: [newItemEmbed] });
                     const outPath = path.join(__dirname, "./app/temp/boothData.json");
