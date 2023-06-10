@@ -25,7 +25,7 @@ function compareJsonFiles(directoryPath, predefinedJson) {
               const json = JSON.parse(data);
               const index0Item = json.find(item => item.index === 0);
 
-              if (!index0Item || JSON.stringify(index0Item.data_product_id) !== JSON.stringify(predefinedJson[0].data_product_id)) {
+              if (!index0Item || index0Item.data_product_id !== predefinedJson[0].data_product_id) {
                 mismatchCount++;
               }
             } catch (error) {
