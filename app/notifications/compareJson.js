@@ -2,44 +2,50 @@ const fs = require('fs');
 const path = require('path');
 
 function compareJsonFiles(directoryPath, predefinedJson) {
+  console.log(predefinedJson);
   return new Promise((resolve, reject) => {
-    fs.readdir(directoryPath, (err, files) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      let mismatchCount = 0;
+    fs.promises.readdir(directoryPath).then((files) => {
+      console.log(files);
+      let readPromises = [];
 
       files.forEach(file => {
         if (path.extname(file) === '.json') {
           const filePath = path.join(directoryPath, file);
 
-          fs.readFile(filePath, 'utf8', (err, data) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-
-            try {
-              const json = JSON.parse(data);
-              const index0Item = json.find(item => item.index === 0);
-
-              if (!index0Item || index0Item.data_product_id !== predefinedJson[0].data_product_id) {
-                mismatchCount++;
-              }
-            } catch (error) {
-              reject(error);
-            }
-
-            if (mismatchCount > 0) {
-              resolve(0); // 一致しなかった場合、0を返す
-            } else {
-              resolve(1); // 一致した場合、1を返す
-            }
-          });
+          // Push each read file promise into the array
+          readPromises.push(fs.promises.readFile(filePath, 'utf8'));
         }
       });
+
+      // Wait for all readFile promises to resolve
+      Promise.all(readPromises).then((fileContents) => {
+        let mismatchFound = false;
+
+        // Loop through each file content
+        fileContents.forEach(data => {
+          try {
+            const json = JSON.parse(data);
+
+            // Compare entire JSON data
+            if (JSON.stringify(json) !== JSON.stringify(predefinedJson)) {
+              mismatchFound = true; // Set the flag if mismatch is found
+            }
+          } catch (error) {
+            reject(error);
+          }
+        });
+
+        // Check if any mismatch was found
+        if (mismatchFound) {
+          resolve(0); // If any mismatch was found, return 0
+        } else {
+          resolve(1); // If no mismatch was found (all matched), return 1
+        }
+      }).catch((err) => {
+        reject(err);
+      });
+    }).catch((err) => {
+      reject(err);
     });
   });
 }

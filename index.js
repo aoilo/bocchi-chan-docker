@@ -8,7 +8,8 @@ const BoothItem = require("./app/models/BoothItem")
 const scrapeBoothData = require("./app/notifications/notification")
 const compareJsonFiles = require('./app/notifications/compareJson')
 const path = require('path')
-const fs = require('fs');
+const fsp = require('fs').promises
+const fs = require('fs')
 const cron = require('node-cron')
 const tempPath = path.join(__dirname, "./app/temp");
 // const ENV_PATH = path.join(__dirname, '../../.env');
@@ -98,59 +99,52 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.on('ready', async () => {
 	console.log(`${client.user.tag}でログインしました。`);
+
     const channel = await client.channels.fetch(process.env.CHANNEL2)
-    cron.schedule('*/30 * * * * *', () => {
-        scrapeBoothData().then((itemData) => {
-            sorted = itemData.sort((a, b) => a.index - b.index);
-            compareJsonFiles(tempPath, sorted)
-            .then(async result => {
-                if(!result) {
-                    for (let i = 0; i < 5; i++) {
-                        try {
-                            const exist = await BoothItem.findOne({ where: { data_product_id: sorted[i]['data_product_id'] } });
-                            if (exist) {
-                                continue;
-                            }
-                            let newItem = await BoothItem.create({
-                                data_product_id: sorted[i]['data_product_id'],
-                                name: sorted[i]['name'],
-                                shop_name: sorted[i]['shop_name'],
-                                data_product_category: sorted[i]['data_product_category'],
-                                url: sorted[i]['url'],
-                                img: sorted[i]['img']
-                            });
-                        } catch(ex) {
-                            console.log(ex);
-                        }
-                    }
-                    const newItemEmbed = new EmbedBuilder()
-                    .setColor(0x0099FF)
-                    .setTitle(sorted[0]['name'])
-                    .setURL(sorted[0]['url'])
-                    .setAuthor({ name: 'Booth新着アイテム' })
-                    .setDescription(sorted[0]['shop_name'])
-                    // .setThumbnail(sorted[0]['image'])
-                    .setImage(sorted[0]['img'])
-                    .setTimestamp()
-                    channel.send({ embeds: [newItemEmbed] });
-                    const outPath = path.join(__dirname, "./app/temp/boothData.json");
-                    fs.writeFile(outPath, JSON.stringify(sorted, null, 2), (err) => {
-                        if (err) {
-                            console.error(err);
-                            return;
-                        }
-                        console.log("ファイル出力完了。");
-                    });
-                }
-                console.log('0:不一致 1:一致 :', result);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }).catch((error) => {
-            console.error(error);
-        });
-    })
+    // cron.schedule('*/30 * * * * *', main());
+    const main = async () => {
+  // const fs = require('fs').promises;
+
+      try {
+          const itemData = await scrapeBoothData();
+          const sorted = itemData.sort((a, b) => a.index - b.index);
+          const result = await compareJsonFiles(tempPath, sorted);
+  
+          if (!result) {
+              for (let i = 0; i < 10; i++) {
+                  const exist = await BoothItem.findOne({ where: { data_product_id: sorted[i]['data_product_id'] } });
+                  if (exist) continue;
+                  await BoothItem.create({
+                      data_product_id: sorted[i]['data_product_id'],
+                      name: sorted[i]['name'],
+                      shop_name: sorted[i]['shop_name'],
+                      data_product_category: sorted[i]['data_product_category'],
+                      url: sorted[i]['url'],
+                      img: sorted[i]['img']
+                  });
+
+                  const newItemEmbed = new EmbedBuilder()
+                  .setColor(0x0099FF)
+                  .setTitle(sorted[i]['name'])
+                  .setURL(sorted[i]['url'])
+                  .setAuthor({ name: 'Booth新着アイテム' })
+                  .setDescription(sorted[i]['shop_name'])
+                  .setImage(sorted[i]['img'])
+                  .setTimestamp()
+                  channel.send({ embeds: [newItemEmbed] });
+              }
+              const outPath = path.join(tempPath, "boothData.json");
+              await fsp.writeFile(outPath, JSON.stringify(sorted, null, 2));
+              console.log("ファイル出力完了。");
+          }
+          console.log('0:不一致 1:一致 :', result);
+      } catch (error) {
+          console.error('Error:', error);
+      }
+  };
+  
+  // // cron job
+  cron.schedule('*/30 * * * * *', main);
 });
 
 client.login(process.env.TOKEN);

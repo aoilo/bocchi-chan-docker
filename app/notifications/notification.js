@@ -11,7 +11,7 @@ const scrapeBoothData = () => {
         const itemData = [];
         let index = 0;
         const itemPromises = items.map((i, el) => {
-            if(index > 4) {
+            if(index > 9) {
               return
             }
             const item = {};
