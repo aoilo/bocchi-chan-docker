@@ -71,3 +71,4 @@ uploads/
 .DS_Store
 
 mysql/
+config/

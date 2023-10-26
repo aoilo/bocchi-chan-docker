@@ -29,5 +29,8 @@
   "bugs": {
     "url": "https://github.com/5573/bocchi-chan-docker/issues"
   },
-  "homepage": "https://github.com/5573/bocchi-chan-docker#readme"
+  "homepage": "https://github.com/5573/bocchi-chan-docker#readme",
+  "devDependencies": {
+    "sequelize-cli": "^6.6.1"
+  }
 }
