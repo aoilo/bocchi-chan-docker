@@ -1,4 +1,3 @@
-const axios = require('axios')
 const cheerio = require('cheerio')
 const jsonfile = require('jsonfile')
 const _ = require('lodash')
@@ -11,8 +10,12 @@ const diffFile = path.join(__dirname, '../temp/differences.json')
 
 const scrapeBoothData = async () => {
 	try {
-		const response = await axios.get(url)
-		const $ = cheerio.load(response.data)
+		const response = await fetch(url)
+		const body = await response.text();
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+		const $ = cheerio.load(body)
 
 		const items = $('.l-cards-5cols li')
 		const itemData = []
